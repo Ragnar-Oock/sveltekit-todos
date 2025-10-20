@@ -8,10 +8,10 @@
 		doneOn: Date;
 	}
 
-	const { todo = $bindable() }: {todo: Todo} = $props();
+	const { todo }: {todo: Todo} = $props();
 
-	let isChecked = $derived(todo.doneOn !== null);
-	const toggle = () => todo.doneOn = isChecked ? new Date() : null;
+	const isDone = () => todo.doneOn !== null;
+	const toggle = (isDoneNow: boolean) => todo.doneOn = isDoneNow ? new Date() : null;
 </script>
 
 <li>
@@ -19,8 +19,7 @@
 		type="checkbox"
 		name="{todo.id}"
 		id="{todo.id}"
-		bind:checked={isChecked}
-		onchange={toggle}
+		bind:checked={isDone, toggle}
 	>
 	<label for="{todo.id}">{todo.label}</label>
 </li>

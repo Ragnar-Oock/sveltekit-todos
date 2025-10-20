@@ -22,8 +22,6 @@
 
 
 	const addTodo: Attachment = form => {
-
-		on(document, 'focusin', ({target}) => console.log(target))
 		on(form, 'submit', event => {
 			if (newTodo === '') {return;}
 			todos.push(todo(newTodo));
@@ -49,19 +47,19 @@
 	<input type="submit" value="addTodo">
 </form>
 
-<output>{JSON.stringify(todos)}</output>
+<output><pre>{JSON.stringify(todos, null, 2)}</pre></output>
 
 <h2>Done :</h2>
-{#each doneTodos as _,index}
+{#each doneTodos as todo,index (todo.id)}
 	<ul>
-		<TodoItem bind:todo={doneTodos[index]}></TodoItem>
+		<TodoItem todo={doneTodos[index]}></TodoItem>
 	</ul>
 {/each}
 
 <h2>To Do :</h2>
-{#each pendingTodos as _,index}
+{#each pendingTodos as todo,index (todo.id)}
 	<ul>
-		<TodoItem bind:todo={pendingTodos[index]}></TodoItem>
+		<TodoItem todo={pendingTodos[index]}></TodoItem>
 	</ul>
 {/each}
 
