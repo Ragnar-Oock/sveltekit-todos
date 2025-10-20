@@ -52,14 +52,14 @@
 <h2>Done :</h2>
 {#each doneTodos as todo,index (todo.id)}
 	<ul>
-		<TodoItem todo={doneTodos[index]}></TodoItem>
+		<TodoItem bind:todo={() => todo, update => doneTodos[index] = update}></TodoItem>
 	</ul>
 {/each}
 
 <h2>To Do :</h2>
 {#each pendingTodos as todo,index (todo.id)}
 	<ul>
-		<TodoItem todo={pendingTodos[index]}></TodoItem>
+		<TodoItem bind:todo={() => todo, update => pendingTodos[index] = update}></TodoItem>
 	</ul>
 {/each}
 

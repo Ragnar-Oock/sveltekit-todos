@@ -8,7 +8,7 @@
 		doneOn: Date;
 	}
 
-	const { todo }: {todo: Todo} = $props();
+	const { todo = $bindable() }: {todo: Todo} = $props();
 
 	const isDone = () => todo.doneOn !== null;
 	const toggle = (isDoneNow: boolean) => todo.doneOn = isDoneNow ? new Date() : null;
