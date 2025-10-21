@@ -1,21 +1,20 @@
 <script lang="ts">
+	import type { Done } from "$lib/db/json-db";
+	import type { SubmitFunction } from "@sveltejs/kit";
 	import type { Attachment } from "svelte/attachments";
-	import type { Done, Todo } from "./Todo.svelte";
 	import TodoItem from './Todo.svelte';
 	import { on } from "svelte/events";
+	import { enhance } from '$app/forms';
 
+	let { data } = $props();
 
 	const todo = (label: string) => ({
 		id: crypto.randomUUID(),
 		label,
-		doneOn: null,
+		doneAt: null,
 	})
 
-	const todos = $state<Todo[]>([
-		todo('groceries'),
-		todo('sport'),
-		todo('cooking')
-	]);
+	const todos = $derived(data.todos);
 
 	let newTodo = $state('');
 	let newTodoInput: HTMLInputElement;
@@ -33,24 +32,29 @@
 
 	const doneTodos = $derived.by(() =>
 		todos
-			.filter((todo): todo is Done => todo.doneOn !== null)
-			.sort((before, after) => before.doneOn.valueOf() - after.doneOn.valueOf())
+			.filter((todo): todo is Done => todo.doneAt !== null)
+			.sort((before, after) => before.doneAt.valueOf() - after.doneAt.valueOf())
 	)
-	const pendingTodos = $derived.by(() => todos.filter(({doneOn}) => doneOn === null));
+	const pendingTodos = $derived.by(() => todos.filter(({doneAt}) => doneAt === null));
+
+	const onSubmit: SubmitFunction = () => ({update}) => {
+		update();
+		newTodoInput.focus();
+		console.log(newTodoInput)
+	};
 </script>
 
-<form {@attach addTodo}>
-
+<form method="post" action="?/create" use:enhance={onSubmit}>
 	<label for="newTodo">add todo</label>
-	<input type="text" name="newTodo" id="newTodo" bind:value={newTodo} bind:this={newTodoInput}>
+	<input type="text" name="label" id="newTodo" bind:value={newTodo} bind:this={newTodoInput}>
 
 	<input type="submit" value="addTodo">
 </form>
 
-<output><pre>{JSON.stringify(todos, null, 2)}</pre></output>
+<output><pre>{JSON.stringify(doneTodos, null, 2)}</pre></output>
 
 <h2>Done :</h2>
-{#each doneTodos as todo,index (todo.id)}
+{#each doneTodos as todo,index}
 	<ul>
 		<TodoItem bind:todo={() => todo, update => doneTodos[index] = update}></TodoItem>
 	</ul>

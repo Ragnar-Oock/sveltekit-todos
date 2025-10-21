@@ -1,25 +1,28 @@
 <script lang="ts">
-	export interface Todo {
-		readonly id: string;
-		label: string;
-		doneOn: Date | null;
-	}
-	export interface Done extends Todo {
-		doneOn: Date;
-	}
+	import { enhance } from '$app/forms';
+	import type { Todo } from "$lib/db/json-db";
 
 	const { todo = $bindable() }: {todo: Todo} = $props();
 
-	const isDone = () => todo.doneOn !== null;
-	const toggle = (isDoneNow: boolean) => todo.doneOn = isDoneNow ? new Date() : null;
+	let isDone = $derived(todo.doneAt !== null);
+	$effect(() => console.log(todo))
+
+	let stupidForm: HTMLFormElement;
+	const onChange = () => {
+		stupidForm?.requestSubmit();
+	}
+
 </script>
 
 <li>
-	<input
-		type="checkbox"
-		name="{todo.id}"
-		id="{todo.id}"
-		bind:checked={isDone, toggle}
-	>
-	<label for="{todo.id}">{todo.label}</label>
+	<form method="post" action="/?/toggle" bind:this={stupidForm} use:enhance>
+		<input type="hidden" name="id" value="{todo.id}">
+		<input
+				type="checkbox"
+				id="{todo.id}"
+				bind:checked={isDone}
+				onchange={onChange}
+		>
+		<label for="{todo.id}">{todo.label}{#if todo.doneAt !== null} ({todo.doneAt.valueOf()}){/if}</label>
+	</form>
 </li>
