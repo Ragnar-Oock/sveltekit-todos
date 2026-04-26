@@ -7,11 +7,11 @@ export const todoId = () => crypto.randomUUID() as TodoId;
 export type Todo = {
 	id: TodoId,
 	label: string,
-	doneAt: Date | null,
-	createdAt: Date,
+	doneAt: number | null,
+	createdAt: number,
 }
 export interface Done extends Todo {
-	doneAt: Date;
+	doneAt: number;
 }
 export type DB = {
 	todo: Record<TodoId, Todo>
@@ -28,8 +28,8 @@ export async function createTodo(label: string, done = false): Promise<Todo> {
 	return await writeEntity('todo', id, {
 		id,
 		label,
-		doneAt: done ? new Date() : null,
-		createdAt: new Date(),
+		doneAt: done ? new Date().getTime() : null,
+		createdAt: new Date().getTime(),
 	});
 }
 
@@ -38,12 +38,9 @@ export async function toggleTodo(id: TodoId): Promise<boolean> {
 	let wasDown: boolean | undefined = undefined;
 
 	const updated = await updateEntity('todo', id, todo => {
-		console.log(todo)
 		wasDown = todo.doneAt !== null
-		todo.doneAt = wasDown ? null : new Date();
-		return todo;
+		todo.doneAt = wasDown ? null : new Date().getTime();
 	})
-	console.log(updated)
 
 	if (wasDown === undefined) {
 		throw new Error('updater is fucked up')
@@ -52,8 +49,14 @@ export async function toggleTodo(id: TodoId): Promise<boolean> {
 	return !wasDown;
 }
 
+export async function updateTodo(todo: Pick<Todo, 'id' | 'label'>): Promise<Todo> {
+	return await updateEntity('todo', todo.id, saved => {
+		saved.label = todo.label;
+	});
+}
+
 export async function getAllTodos(): Promise<Todo[]> {
 	return Object
 		.values(await listEntities('todo'))
-		.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+		.sort((a, b) => a.createdAt - b.createdAt)
 }

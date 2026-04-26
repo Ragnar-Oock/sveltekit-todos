@@ -32,12 +32,20 @@ export async function writeEntity<tableName extends keyof DB, rowId extends keyo
 	return value;
 }
 
-export async function updateEntity<tableName extends keyof DB, rowId extends keyofTable<tableName>>(table: tableName, id: rowId, updater: (entity: DB[tableName][rowId]) => DB[tableName][rowId]): Promise<DB[tableName][rowId]> {
+/**
+ * Get an entity from storage, run the updater function on it and save the return of it (if lacking on the potentially
+ * modified original object) back in the storage
+ *
+ * @param table the type of entity to update
+ * @param id the entity's unique id
+ * @param updater an updater function taking the existing entity and returning an entity of the same kind or nothing
+ */
+export async function updateEntity<tableName extends keyof DB, rowId extends keyofTable<tableName>>(table: tableName, id: rowId, updater: (entity: DB[tableName][rowId]) => (DB[tableName][rowId] | void)): Promise<DB[tableName][rowId]> {
 	const entity = await readEntity(table, id);
 	if (entity === null) {
 		throw new Error(`Tried to update non existing ${table} entity with id ${id}.`);
 	}
-	return await writeEntity(table, id, updater(entity));
+	return await writeEntity(table, id, updater(entity) ?? entity);
 }
 
 export async function deleteEntity<tableName extends keyof DB, rowId extends keyofTable<tableName>>(table: tableName, id: rowId): Promise<void> {

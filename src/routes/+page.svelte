@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Done } from "$lib/db/json-db";
+	import type { Done, TodoId } from "$lib/db/json-db";
 	import type { SubmitFunction } from "@sveltejs/kit";
 	import type { Attachment } from "svelte/attachments";
 	import TodoItem from './Todo.svelte';
@@ -9,9 +9,10 @@
 	let { data } = $props();
 
 	const todo = (label: string) => ({
-		id: crypto.randomUUID(),
+		id: crypto.randomUUID() as TodoId,
 		label,
 		doneAt: null,
+		createdAt: Date.now()
 	})
 
 	const todos = $derived(data.todos);
@@ -50,8 +51,6 @@
 
 	<input type="submit" value="addTodo">
 </form>
-
-<output><pre>{JSON.stringify(doneTodos, null, 2)}</pre></output>
 
 <h2>Done :</h2>
 {#each doneTodos as todo,index}
